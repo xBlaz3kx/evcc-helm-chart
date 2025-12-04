@@ -1,0 +1,61 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "evcc.fullname" . }}
+  labels:
+    {{- include "evcc.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  selector:
+    {{- include "evcc.selectorLabels" . | nindent 4 }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    {{- if .Values.service.ports.mdns.enabled }}
+    # mDNS
+    - port: 5353
+      targetPort: mdns
+      protocol: UDP
+      name: mdns
+    {{- end }}
+    {{- if .Values.service.ports.eebus.enabled }}
+    # EEBus
+    - port: 4712
+      targetPort: eebus
+      protocol: TCP
+      name: eebus
+    {{- end }}
+    {{- if .Values.service.ports.keba.enabled }}
+    # KEBA charger
+    - port: 7090
+      targetPort: keba
+      protocol: UDP
+      name: keba
+    {{- end }}
+    {{- if .Values.service.ports.ocpp.enabled }}
+    # OCPP charger
+    - port: 8887
+      targetPort: ocpp
+      protocol: TCP
+      name: ocpp
+    {{- end }}
+    {{- if .Values.service.ports.modbusUdp.enabled }}
+    # Modbus UDP
+    - port: 8899
+      targetPort: modbus-udp
+      protocol: UDP
+      name: modbus-udp
+    {{- end }}
+    {{- if .Values.service.ports.sma.enabled }}
+    # SMA Energy Manager
+    - port: 9522
+      targetPort: sma
+      protocol: UDP
+      name: sma
+    {{- end }}
