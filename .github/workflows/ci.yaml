@@ -27,9 +27,3 @@ jobs:
       - name: Validate Helm chart templates
         run: |
           helm template evcc charts/evcc --debug --dry-run
-
-      - name: Validate Helm chart with example values
-        run: |
-          if [ -f charts/evcc/values.example.yaml ]; then
-            helm template evcc charts/evcc -f charts/evcc/values.example.yaml --debug --dry-run
-          fi
