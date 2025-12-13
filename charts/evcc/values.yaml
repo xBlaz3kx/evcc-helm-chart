@@ -266,6 +266,8 @@ persistence:
   backup:
     # -- Whether to enable Litestream backups
     enabled: false
+    # -- Whether to restore from backup on startup
+    restore: true
     # -- Litestream image configuration
     image:
       repository: litestream/litestream

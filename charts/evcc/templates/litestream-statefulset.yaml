@@ -26,6 +26,7 @@ spec:
       serviceAccountName: {{ include "evcc.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if .Values.persistence.backup.restore }}
       initContainers:
       - name: init-litestream
         image: "{{ .Values.persistence.backup.image.repository }}:{{ .Values.persistence.backup.image.tag }}"
@@ -71,6 +72,7 @@ spec:
         {{- end }}
         resources:
           {{- toYaml .Values.persistence.backup.resources | nindent 10 }}
+      {{- end }}
       containers:
       - name: litestream
         image: "{{ .Values.persistence.backup.image.repository }}:{{ .Values.persistence.backup.image.tag }}"
