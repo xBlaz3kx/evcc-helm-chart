@@ -260,6 +260,48 @@ persistence:
   # -- The size of the persistent volume claim
   size: 5Gi
 
+  databasePath: /etc/evcc/evcc.db
+
+  # -- Backup configuration for Litestream
+  backup:
+    # -- Whether to enable Litestream backups
+    enabled: false
+    # -- Litestream image configuration
+    image:
+      repository: litestream/litestream
+      tag: "0.5"
+      pullPolicy: IfNotPresent
+    # -- Litestream resources
+    resources:
+      limits:
+        cpu: 100m
+        memory: 128Mi
+      requests:
+        cpu: 10m
+        memory: 64Mi
+
+    # -- Backup type (currently supports: s3)
+    type: s3
+    # -- S3 backup configuration
+    s3:
+      # -- S3 bucket name
+      bucket: ""
+      # -- S3 region
+      region: ""
+      # -- S3 endpoint (optional, for S3-compatible services)
+      endpoint: ""
+      # -- S3 path prefix (optional)
+      path: ""
+      # -- S3 access key ID (can also be set via secret)
+      accessKeyId: ""
+      # -- S3 secret access key (can also be set via secret)
+      secretAccessKey: ""
+      # -- Use existing secret for S3 credentials (if set, accessKeyId and secretAccessKey are ignored)
+      existingSecret: ""
+      # -- Secret key names in existing secret (defaults to access-key-id and secret-access-key)
+      secretAccessKeyIdKey: access-key-id
+      secretSecretAccessKeyKey: secret-access-key
+
 # -- Liveness probe for the deployment
 livenessProbe:
   httpGet:

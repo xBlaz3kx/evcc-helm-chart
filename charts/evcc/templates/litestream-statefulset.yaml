@@ -1,0 +1,143 @@
+{{- if and .Values.persistence.enabled .Values.persistence.backup.enabled }}
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "evcc.fullname" . }}-litestream
+  labels:
+    {{- include "evcc.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "evcc.selectorLabels" . | nindent 6 }}
+      component: litestream
+  serviceName: {{ include "evcc.fullname" . }}-litestream
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        {{- include "evcc.selectorLabels" . | nindent 8 }}
+        component: litestream
+    spec:
+      restartPolicy: Always
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "evcc.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+      - name: init-litestream
+        image: "{{ .Values.persistence.backup.image.repository }}:{{ .Values.persistence.backup.image.tag }}"
+        imagePullPolicy: {{ .Values.persistence.backup.image.pullPolicy }}
+        args: ['restore', '-if-db-not-exists', '-if-replica-exists', '{{ .Values.persistence.backup.databasePath }}']
+        volumeMounts:
+        - name: data
+          mountPath: {{ .Values.persistence.backup.databasePath }}
+        - name: configmap
+          mountPath: /etc/litestream.yml
+          subPath: litestream.yml
+        env:
+        {{- if .Values.persistence.backup.s3.existingSecret }}
+        - name: LITESTREAM_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.persistence.backup.s3.existingSecret }}
+              key: {{ .Values.persistence.backup.s3.secretAccessKeyIdKey }}
+        - name: LITESTREAM_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.persistence.backup.s3.existingSecret }}
+              key: {{ .Values.persistence.backup.s3.secretSecretAccessKeyKey }}
+        {{- else }}
+        - name: LITESTREAM_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "evcc.fullname" . }}-litestream
+              key: access-key-id
+        - name: LITESTREAM_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "evcc.fullname" . }}-litestream
+              key: secret-access-key
+        {{- end }}
+        {{- if .Values.persistence.backup.s3.region }}
+        - name: AWS_REGION
+          value: {{ .Values.persistence.backup.s3.region | quote }}
+        {{- end }}
+        {{- if .Values.persistence.backup.s3.endpoint }}
+        - name: AWS_ENDPOINT
+          value: {{ .Values.persistence.backup.s3.endpoint | quote }}
+        {{- end }}
+        resources:
+          {{- toYaml .Values.persistence.backup.resources | nindent 10 }}
+      containers:
+      - name: litestream
+        image: "{{ .Values.persistence.backup.image.repository }}:{{ .Values.persistence.backup.image.tag }}"
+        imagePullPolicy: {{ .Values.persistence.backup.image.pullPolicy }}
+        args: ['replicate']
+        volumeMounts:
+        - name: data
+          mountPath: {{ .Values.persistence.backup.databasePath }}
+        - name: configmap
+          mountPath: /etc/litestream.yml
+          subPath: litestream.yml
+        env:
+        {{- if .Values.persistence.backup.s3.existingSecret }}
+        - name: LITESTREAM_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.persistence.backup.s3.existingSecret }}
+              key: {{ .Values.persistence.backup.s3.secretAccessKeyIdKey }}
+        - name: LITESTREAM_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Values.persistence.backup.s3.existingSecret }}
+              key: {{ .Values.persistence.backup.s3.secretSecretAccessKeyKey }}
+        {{- else }}
+        - name: LITESTREAM_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "evcc.fullname" . }}-litestream
+              key: access-key-id
+        - name: LITESTREAM_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "evcc.fullname" . }}-litestream
+              key: secret-access-key
+        {{- end }}
+        {{- if .Values.persistence.backup.s3.region }}
+        - name: AWS_REGION
+          value: {{ .Values.persistence.backup.s3.region | quote }}
+        {{- end }}
+        {{- if .Values.persistence.backup.s3.endpoint }}
+        - name: AWS_ENDPOINT
+          value: {{ .Values.persistence.backup.s3.endpoint | quote }}
+        {{- end }}
+        ports:
+        - name: metrics
+          containerPort: 9090
+          protocol: TCP
+        resources:
+          {{- toYaml .Values.persistence.backup.resources | nindent 10 }}
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: {{ if .Values.persistence.existingClaim }}{{ .Values.persistence.existingClaim }}{{- else }}{{ template "evcc.fullname" . }}{{- end }}
+      - name: configmap
+        configMap:
+          name: {{ include "evcc.fullname" . }}-litestream
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
+

@@ -1,0 +1,29 @@
+{{- if and .Values.persistence.enabled .Values.persistence.backup.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "evcc.fullname" . }}-litestream
+  labels:
+    {{- include "evcc.labels" . | nindent 4 }}
+data:
+  litestream.yml: |
+    dbs:
+      - path: {{ .Values.persistence.backup.databasePath }}
+        replica:
+          {{- if eq .Values.persistence.backup.type "s3" }}
+          # url: s3://{{ .Values.persistence.backup.s3.endpoint }}/{{ trimPrefix "/" .Values.persistence.backup.s3.path }}/evcc.db
+          {{- end }}
+          {{- if .Values.persistence.backup.s3.region }}
+          region: {{ .Values.persistence.backup.s3.region }}
+          {{- end }}
+          {{- if .Values.persistence.backup.s3.endpoint }}
+          endpoint: {{ .Values.persistence.backup.s3.endpoint }}
+          {{- end }}
+          {{- if .Values.persistence.backup.s3.bucket }}
+          bucket: {{ .Values.persistence.backup.s3.bucket }}
+          {{end}}
+          {{- if .Values.persistence.backup.s3.path }}
+          path: {{ .Values.persistence.backup.s3.path }}
+          {{end}}
+{{- end }}
+
