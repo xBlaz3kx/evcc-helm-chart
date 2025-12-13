@@ -21,3 +21,4 @@ helm install my-evcc evcc/evcc
 
 - Configurable EVCC settings via Helm values
 - Exposure of OCPP, MQTT, Modbus, and HTTP APIs via services
+- Configurable SQLite database remote backups
