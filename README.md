@@ -1,6 +1,6 @@
 # EVCC Helm chart
 
-This Helm chart deploys EVCC, an open-source electric vehicle charging controller, on a Kubernetes cluster.
+This Helm chart deploys [EVCC](https://evcc.io/), an open-source electric vehicle charging controller, on a Kubernetes cluster.
 The chart derives from https://jitsehijlkema.github.io/evcc-chart/ with few improvements and updates.
 
 ## Prerequisites
@@ -13,7 +13,7 @@ The chart derives from https://jitsehijlkema.github.io/evcc-chart/ with few impr
 To install the chart with the release name `my-evcc`:
 
 ```bash
-helm repo add evcc https://evcc.io/helm-charts
+helm repo add evcc https://helm.blazdular.cc/charts
 helm install my-evcc evcc/evcc
 ```
 
