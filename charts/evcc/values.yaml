@@ -41,7 +41,7 @@ config: |
   database: 
   type: sqlite
   # NOTE: When replication is enabled, make sure to use the path below and enable WAL mode
-  # dsn: /var/lib/evcc/evcc.db?cache=shared&_journal_mode=WAL
+  # dsn: /var/lib/evcc/evcc.db?cache=shared&_pragma=journal_mode(wal)&_pragma=busy_timeout=5000
   
   # default configuration, see: https://docs.evcc.io/en/docs/reference/configuration
   site:
