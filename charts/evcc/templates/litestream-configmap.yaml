@@ -9,6 +9,8 @@ data:
   litestream.yml: |
     dbs:
       - path: {{ .Values.persistence.backup.databasePath }}
+        monitor-interval: 1m
+        checkpoint-interval: 1m
         replica:
           {{- if eq .Values.persistence.backup.type "s3" }}
           # url: s3://{{ .Values.persistence.backup.s3.endpoint }}/{{ trimPrefix "/" .Values.persistence.backup.s3.path }}/evcc.db
@@ -25,5 +27,6 @@ data:
           {{- if .Values.persistence.backup.s3.path }}
           path: {{ .Values.persistence.backup.s3.path }}
           {{end}}
+          sync-interval: 1m
 {{- end }}
 
