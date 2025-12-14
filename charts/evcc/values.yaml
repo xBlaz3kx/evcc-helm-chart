@@ -38,6 +38,11 @@ nameOverride: ""
 fullnameOverride: ""
 
 config: |
+  database: 
+  type: sqlite
+  # NOTE: When replication is enabled, make sure to use the path below and enable WAL mode
+  # dsn: /var/lib/evcc/evcc.db?cache=shared&_journal_mode=WAL
+  
   # default configuration, see: https://docs.evcc.io/en/docs/reference/configuration
   site:
     title: Home # display name for UI
