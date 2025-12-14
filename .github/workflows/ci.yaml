@@ -4,9 +4,14 @@ on:
   pull_request:
     branches:
       - main
+    paths:
+      - "charts/evcc"
+
   push:
     branches:
       - main
+    paths:
+      - "charts/evcc"
 
 jobs:
   lint-and-validate:
