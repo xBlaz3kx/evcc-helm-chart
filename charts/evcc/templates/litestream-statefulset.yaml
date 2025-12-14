@@ -36,7 +36,7 @@ spec:
         args: ['restore', '-if-db-not-exists', '-if-replica-exists', '{{ .Values.persistence.backup.databasePath }}']
         volumeMounts:
         - name: data
-          mountPath: {{ .Values.persistence.backup.databasePath }}
+          mountPath: {{ .Values.persistence.backup.databasePath | dir | quote }}
         - name: configmap
           mountPath: /etc/litestream.yml
           subPath: litestream.yml
