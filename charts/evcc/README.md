@@ -61,7 +61,7 @@ Helm chart for EVCC (evcc.io)
 | persistence.backup.s3.secretAccessKeyIdKey | string | `"access-key-id"` | Secret key name for access key ID in existing secret |
 | persistence.backup.s3.secretSecretAccessKeyKey | string | `"secret-access-key"` | Secret key name for secret access key in existing secret |
 | persistence.backup.type | string | `"s3"` | Backup type (currently supports: s3) |
-| persistence.databasePath | string | `"/etc/evcc/evcc.db"` | The database path |
+| persistence.databasePath | string | `"/var/lib/evcc/evcc.db"` | The database path |
 | persistence.enabled | bool | `false` | Whether to enable persistence for the deployment |
 | persistence.existingClaim | string | `""` | Use an existing PVC to persist data |
 | persistence.size | string | `"5Gi"` | The size of the persistent volume claim |

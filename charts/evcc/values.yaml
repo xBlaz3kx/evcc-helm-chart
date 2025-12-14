@@ -267,7 +267,7 @@ persistence:
   # -- The size of the persistent volume claim
   size: 5Gi
 
-  databasePath: /etc/evcc/evcc.db
+  databasePath: /var/lib/evcc/evcc.db
 
   # -- Backup configuration for Litestream
   backup:
@@ -283,11 +283,11 @@ persistence:
     # -- Litestream resources
     resources:
       limits:
-        cpu: 100m
-        memory: 128Mi
+        cpu: 200m
+        memory: 512Mi
       requests:
-        cpu: 10m
-        memory: 64Mi
+        cpu: 50m
+        memory: 128Mi
 
     # -- Backup type (currently supports: s3)
     type: s3
