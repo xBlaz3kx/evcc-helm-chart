@@ -15,6 +15,7 @@ Helm chart for EVCC (evcc.io)
 | deploymentStrategy | object | `{"maxSurge":1,"maxUnavailable":0,"type":"RollingUpdate"}` | Specifies the deployment strategy used to replace old Pods by new ones, default: `RollingUpdate` |
 | deploymentStrategy.maxSurge | int | `1` | The maximum number of Pods that can be created over the desired number of Pods. |
 | deploymentStrategy.maxUnavailable | int | `0` | The maximum number of Pods that can be unavailable during the update. |
+| deploymentStrategy.type | string | `"RollingUpdate"` | The deployment strategy type (RollingUpdate or Recreate) |
 | externalSecrets.annotations | object | `{}` | Annotations to add to the external secret |
 | externalSecrets.data | list | `[]` | Secrets to be loaded from the external secret store |
 | externalSecrets.enabled | bool | `false` | Whether to enable external secrets for the configmap |
@@ -44,12 +45,30 @@ Helm chart for EVCC (evcc.io)
 | nameOverride | string | `""` | This is to override the chart name. |
 | nodeSelector | object | `{}` | NodeSelector to use for the deployment |
 | persistence.accessMode | string | `"ReadWriteOnce"` | The access mode to use for the persistent volume claim |
+| persistence.backup.enabled | bool | `false` | Whether to enable Litestream backups |
+| persistence.backup.image.pullPolicy | string | `"IfNotPresent"` | Pull policy for the Litestream image |
+| persistence.backup.image.repository | string | `"litestream/litestream"` | Litestream image repository |
+| persistence.backup.image.tag | string | `"0.5"` | Litestream image tag |
+| persistence.backup.resources | object | `{"limits":{"cpu":"100m","memory":"128Mi"},"requests":{"cpu":"10m","memory":"64Mi"}}` | Litestream resources |
+| persistence.backup.restore | bool | `true` | Whether to restore from backup on startup |
+| persistence.backup.s3.accessKeyId | string | `""` | S3 access key ID (can also be set via secret) |
+| persistence.backup.s3.bucket | string | `""` | S3 bucket name |
+| persistence.backup.s3.endpoint | string | `""` | S3 endpoint (optional, for S3-compatible services) |
+| persistence.backup.s3.existingSecret | string | `""` | Use existing secret for S3 credentials (if set, accessKeyId and secretAccessKey are ignored) |
+| persistence.backup.s3.path | string | `""` | S3 path prefix (optional) |
+| persistence.backup.s3.region | string | `""` | S3 region |
+| persistence.backup.s3.secretAccessKey | string | `""` | S3 secret access key (can also be set via secret) |
+| persistence.backup.s3.secretAccessKeyIdKey | string | `"access-key-id"` | Secret key name for access key ID in existing secret |
+| persistence.backup.s3.secretSecretAccessKeyKey | string | `"secret-access-key"` | Secret key name for secret access key in existing secret |
+| persistence.backup.type | string | `"s3"` | Backup type (currently supports: s3) |
+| persistence.databasePath | string | `"/etc/evcc/evcc.db"` | The database path |
 | persistence.enabled | bool | `false` | Whether to enable persistence for the deployment |
 | persistence.existingClaim | string | `""` | Use an existing PVC to persist data |
 | persistence.size | string | `"5Gi"` | The size of the persistent volume claim |
 | persistence.storageClass | string | `"-"` | The storage class to use for the persistent volume claim |
 | podAnnotations | object | `{}` | Annotations to add to the Pod |
 | podLabels | object | `{}` | Labels to add to the Pod. |
+| podNetwork.hostNetwork | bool | `false` | Use host network mode (useful for mDNS and local network device discovery) |
 | podSecurityContext | object | `{}` | PodSecurityContext to be set on the pod level. |
 | readinessProbe | object | `{"httpGet":{"path":"/","port":"http"},"initialDelaySeconds":10,"timeoutSeconds":5}` | Readyiness probe for the deployment |
 | replicaCount | int | `1` | Replica count for the deployment |
@@ -62,6 +81,12 @@ Helm chart for EVCC (evcc.io)
 | service | object | `{"annotations":{},"port":80,"type":"ClusterIP"}` | Service for the deployment |
 | service.annotations | object | `{}` | Annotations for the service |
 | service.port | int | `80` | Kubernetes port where service is exposed |
+| service.ports.eebus.enabled | bool | `true` | Enable EEBus port (4712/tcp) |
+| service.ports.keba.enabled | bool | `true` | Enable KEBA charger port (7090/udp) |
+| service.ports.mdns.enabled | bool | `true` | Enable mDNS port (5353/udp) |
+| service.ports.modbusUdp.enabled | bool | `true` | Enable Modbus UDP port (8899/udp) |
+| service.ports.ocpp.enabled | bool | `true` | Enable OCPP charger port (8887/tcp) |
+| service.ports.sma.enabled | bool | `true` | Enable SMA Energy Manager port (9522/udp) |
 | service.type | string | `"ClusterIP"` | Kubernetes service type |
 | serviceAccount | object | `{"annotations":{},"automount":true,"create":false,"name":""}` | Service account |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
