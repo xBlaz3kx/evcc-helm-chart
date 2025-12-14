@@ -82,7 +82,7 @@ spec:
         args: ['replicate']
         volumeMounts:
         - name: data
-          mountPath: {{ .Values.persistence.backup.databasePath }}
+          mountPath: {{ .Values.persistence.backup.databasePath | dir | quote }}
         - name: configmap
           mountPath: /etc/litestream.yml
           subPath: litestream.yml
