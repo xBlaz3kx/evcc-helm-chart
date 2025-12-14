@@ -14,6 +14,8 @@ spec:
   replicas: 1
   template:
     metadata:
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/litestream-configmap.yaml") . | sha256sum }}
       labels:
         {{- include "evcc.selectorLabels" . | nindent 8 }}
         component: litestream
