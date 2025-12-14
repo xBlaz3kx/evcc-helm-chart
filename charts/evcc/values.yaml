@@ -42,8 +42,8 @@ config: |
   type: sqlite
   # NOTE: When replication is enabled, make sure to use the path below and enable WAL mode
   # Example: 
-  # dsn: /var/lib/evcc/evcc.db?cache=shared&mode=rwc&_pragma=journal_mode(wal)&_pragma=busy_timeout=5000
-  dsn: /var/lib/evcc/evcc.db
+  # dsn: /root/.evcc/evcc.db?cache=shared&mode=rwc&_pragma=journal_mode(wal)&_pragma=busy_timeout=5000
+  dsn: /root/.evcc/evcc.db
   
   # default configuration, see: https://docs.evcc.io/en/docs/reference/configuration
   site:
@@ -267,7 +267,7 @@ persistence:
   # -- The size of the persistent volume claim
   size: 5Gi
 
-  databasePath: /var/lib/evcc/evcc.db
+  databasePath: /root/.evcc/evcc.db
 
   # -- Backup configuration for Litestream
   backup:

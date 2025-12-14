@@ -85,7 +85,7 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
             - name: data
-              mountPath: /root/.evcc
+              mountPath: {{ if .Values.persistence.databasePath }}{{ .Values.persistence.databasePath | dir }}{{ else }}/root/.evcc{{ end }}
             - name: config
               mountPath: /etc/evcc
           {{- with .Values.extraVolumeMounts }}

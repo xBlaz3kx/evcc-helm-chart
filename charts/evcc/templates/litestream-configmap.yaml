@@ -8,7 +8,7 @@ metadata:
 data:
   litestream.yml: |
     dbs:
-      - path: {{ .Values.persistence.backup.databasePath }}
+      - path: {{ .Values.persistence.databasePath }}
         monitor-interval: 1m
         checkpoint-interval: 1m
         replica:
