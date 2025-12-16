@@ -15,6 +15,7 @@ data:
           {{- if eq .Values.persistence.backup.type "s3" }}
           # url: s3://{{ .Values.persistence.backup.s3.endpoint }}/{{ trimPrefix "/" .Values.persistence.backup.s3.path }}/evcc.db
           {{- end }}
+          type: s3
           {{- if .Values.persistence.backup.s3.region }}
           region: {{ .Values.persistence.backup.s3.region }}
           {{- end }}
