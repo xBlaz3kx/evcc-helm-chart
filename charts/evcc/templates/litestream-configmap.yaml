@@ -1,4 +1,15 @@
 {{- if and .Values.persistence.enabled .Values.persistence.backup.enabled }}
+{{- /* Validate S3 backup configuration */}}
+{{- if eq .Values.persistence.backup.type "s3" }}
+{{- if not .Values.persistence.backup.s3.url }}
+{{- if not .Values.persistence.backup.s3.bucket }}
+{{- fail "persistence.backup.s3.bucket is required when persistence.backup.type is 's3' and persistence.backup.s3.url is not provided" }}
+{{- end }}
+{{- if and (not .Values.persistence.backup.s3.existingSecret) (or (not .Values.persistence.backup.s3.accessKeyId) (not .Values.persistence.backup.s3.secretAccessKey)) }}
+{{- fail "persistence.backup.s3 credentials are required when persistence.backup.type is 's3' and persistence.backup.s3.url is not provided. Either set persistence.backup.s3.existingSecret or provide both persistence.backup.s3.accessKeyId and persistence.backup.s3.secretAccessKey" }}
+{{- end }}
+{{- end }}
+{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,26 +19,30 @@ metadata:
 data:
   litestream.yml: |
     dbs:
+      {{- if not (empty .Values.persistence.backup.replicaPath) }}
+      - path: {{ .Values.persistence.databasePath }}
+        replica:
+          path: {{ .Values.persistence.backup.replicaPath }}
+      {{- end}}
       - path: {{ .Values.persistence.databasePath }}
         monitor-interval: 1m
         checkpoint-interval: 1m
         replica:
-          {{- if eq .Values.persistence.backup.type "s3" }}
-          # url: s3://{{ .Values.persistence.backup.s3.endpoint }}/{{ trimPrefix "/" .Values.persistence.backup.s3.path }}/evcc.db
-          {{- end }}
+          sync-interval: 1h
+          {{- if eq .Values.persistence.backup.type "s3"}}
+          {{- if .Values.persistence.backup.s3.url }}
+          url: {{ .Values.persistence.backup.s3.url }}
+          {{else}}
           type: s3
-          {{- if .Values.persistence.backup.s3.region }}
           region: {{ .Values.persistence.backup.s3.region }}
-          {{- end }}
-          {{- if .Values.persistence.backup.s3.endpoint }}
           endpoint: {{ .Values.persistence.backup.s3.endpoint }}
-          {{- end }}
-          {{- if .Values.persistence.backup.s3.bucket }}
           bucket: {{ .Values.persistence.backup.s3.bucket }}
-          {{end}}
-          {{- if .Values.persistence.backup.s3.path }}
+          force-path-style: {{ .Values.persistence.backup.s3.forcePathStyle | default false }}
+          sign-payload: {{ .Values.persistence.backup.s3.signPayload | default false }}
+          {{ end}}
+          {{else}}
           path: {{ .Values.persistence.backup.s3.path }}
-          {{end}}
-          sync-interval: 1m
+          {{- end }}
+
 {{- end }}
 
