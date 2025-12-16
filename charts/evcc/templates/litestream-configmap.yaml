@@ -9,25 +9,25 @@ data:
   litestream.yml: |
     dbs:
       - path: {{ .Values.persistence.databasePath }}
+        replica:
+          path: {{ .Values.persistence.backup.replicaPath }}
+      - path: {{ .Values.persistence.databasePath }}
         monitor-interval: 1m
         checkpoint-interval: 1m
         replica:
+          sync-interval: 1h
           {{- if eq .Values.persistence.backup.type "s3" }}
-          # url: s3://{{ .Values.persistence.backup.s3.endpoint }}/{{ trimPrefix "/" .Values.persistence.backup.s3.path }}/evcc.db
-          {{- end }}
           type: s3
-          {{- if .Values.persistence.backup.s3.region }}
+          {{- if .Values.persistence.backup.s3.url }}
+          url: {{ .Values.persistence.backup.s3.url }}
+          {{else}}
           region: {{ .Values.persistence.backup.s3.region }}
-          {{- end }}
-          {{- if .Values.persistence.backup.s3.endpoint }}
           endpoint: {{ .Values.persistence.backup.s3.endpoint }}
-          {{- end }}
-          {{- if .Values.persistence.backup.s3.bucket }}
           bucket: {{ .Values.persistence.backup.s3.bucket }}
-          {{end}}
-          {{- if .Values.persistence.backup.s3.path }}
-          path: {{ .Values.persistence.backup.s3.path }}
-          {{end}}
-          sync-interval: 1m
+          force-path-style: {{ .Values.persistence.backup.s3.forcePathStyle | default false }}
+          sign-payload: {{ .Values.persistence.backup.s3.signPayload | default false }}
+          {{ end}}
+        path: {{ .Values.persistence.backup.s3.path }}
+
 {{- end }}
 
