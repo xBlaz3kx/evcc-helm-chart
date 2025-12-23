@@ -1,0 +1,9 @@
+---
+owner: xBlaz3kx
+sign: false
+key: blaz@blazdular.cc
+
+charts-dir: charts/*
+git-repo: charts
+repo: charts
+charts_repo_url: "oci://ghcr.io/xBlaz3kx/evcc-helm-chart"
