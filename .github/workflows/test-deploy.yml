@@ -1,0 +1,96 @@
+name: "Test deploy"
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: "Deploy the chart"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v6
+
+      - name: "Set short SHA"
+        run: echo "SHORT_SHA=${GITHUB_SHA::8}" >> $GITHUB_ENV
+
+      - uses: AbsaOSS/k3d-action@v2
+        name: "Create Single agent k3d cluster"
+        with:
+          cluster-name: test-cluster-${{ env.SHORT_SHA }}
+          args: >-
+            --agents 1 
+            -p "7070:7070@agent:0:direct" # Expose EVCC port
+
+      - name: "Set up Helm"
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.3
+
+      - name: "Deploy the chart with example values"
+        run: |
+          helm upgrade test-release ./charts/evcc \
+            --install \
+            -n test \
+            --create-namespace \
+            --values ./charts/evcc/values.yaml \
+            --set service.type=NodePort \
+            --set service.port=7070
+
+      - name: "Verify deployment is successful"
+        run: |
+          set -euo pipefail
+          
+          TIMEOUT=60                            # timeout in seconds
+          INTERVAL=2                            # seconds between attempts
+          MAX_RETRIES=$((TIMEOUT / INTERVAL))
+          RETRY_COUNT=0
+          
+          echo "Waiting for deployment to be ready (timeout ${TIMEOUT}s)..."
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            # Check helm release status
+            if helm status test-release -n test &>/dev/null; then
+              STATUS_OUTPUT=$(helm status test-release -n test 2>/dev/null || echo "")
+              
+              # Check if helm release is deployed
+              if echo "$STATUS_OUTPUT" | grep -q "STATUS: deployed"; then
+                echo "Helm release is deployed."
+                
+                # Check if there are any failed resources or restarts indicated in helm status
+                if echo "$STATUS_OUTPUT" | grep -qi "failed\|error\|restart"; then
+                  echo "❌ Deployment failed: Helm status indicates issues."
+                  echo "$STATUS_OUTPUT"
+                  exit 1
+                fi
+                
+                # Double-check helm status one more time to ensure it's still healthy
+                FINAL_STATUS=$(helm status test-release -n test 2>/dev/null || echo "")
+                if echo "$FINAL_STATUS" | grep -q "STATUS: deployed" && ! echo "$FINAL_STATUS" | grep -qi "failed\|error"; then
+                  echo "✓ Helm release is deployed successfully."
+                  exit 0
+                else
+                  echo "Helm release status changed, retrying..."
+                fi
+              fi
+            fi
+            
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            if [ $RETRY_COUNT -lt $MAX_RETRIES ]; then
+              echo "Attempt ${RETRY_COUNT}/${MAX_RETRIES}: Deployment not ready yet, waiting ${INTERVAL}s..."
+              sleep "${INTERVAL}"
+            fi
+          done
+          
+          echo "❌ Timed out after ${TIMEOUT}s waiting for deployment to be ready."
+          echo "Helm release status:"
+          helm status test-release -n test || true
+          echo "Helm release resources:"
+          helm get manifest test-release -n test || true
+          exit 1
