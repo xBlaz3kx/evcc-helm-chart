@@ -1,0 +1,70 @@
+name: "Test deploy"
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: "Deploy the chart"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@v6
+
+      - name: "Set short SHA"
+        run: echo "SHORT_SHA=${GITHUB_SHA::8}" >> $GITHUB_ENV
+
+      - uses: AbsaOSS/k3d-action@v2
+        name: "Create k3d Cluster"
+        with:
+          cluster-name: test-cluster-${{ env.SHORT_SHA }}
+          args: >-
+            --agents 1 
+            -p "8080:8080@agent:0:direct" # Expose EVCC port
+
+      - name: "Set up Helm"
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.3
+
+      - name: "Deploy the chart with example values"
+        run: |
+          helm upgrade --install test-release ./charts/evcc \
+            -n test \
+            --create-namespace \
+            --values ./charts/evcc/values.yaml \
+            --set service.type=NodePort \
+            --set service.port=8080 \
+
+      - name: "Check the release is deployed"
+        run: |
+          set -euo pipefail
+          
+          URL="${1:-http://localhost:8080/}"   # first arg overrides URL
+          TIMEOUT="${2:-300}"                  # second arg overrides timeout (seconds)
+          INTERVAL=2                           # seconds between attempts
+          
+          start_time=$(date +%s)
+          
+          echo "Waiting for ${URL} (timeout ${TIMEOUT}s)..."
+          while true; do
+          if curl -sSf --max-time 5 "${URL}" >/dev/null 2>&1; then
+          echo "Service at ${URL} is healthy."
+          exit 0
+          fi
+        
+          now=$(date +%s)
+          elapsed=$(( now - start_time ))
+          if [ "${elapsed}" -ge "${TIMEOUT}" ]; then
+          echo "Timed out after ${TIMEOUT}s waiting for ${URL}."
+          exit 1
+          fi
+        
+          sleep "${INTERVAL}"
+          done
