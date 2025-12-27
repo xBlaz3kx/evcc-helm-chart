@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - "charts/evcc"
+      - "charts/evcc/**"
 
   push:
     branches:
       - main
     paths:
-      - "charts/evcc"
+      - "charts/evcc/**"
 
 jobs:
   lint-and-validate:
