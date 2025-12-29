@@ -30,7 +30,7 @@ image:
 restartPolicy: Always
 
 # -- The image pull secrets to use for pulling the image.
-imagePullSecrets: []
+imagePullSecrets: [ ]
 
 # -- This is to override the chart name.
 nameOverride: ""
@@ -120,7 +120,7 @@ externalSecrets:
   # -- Whether to enable external secrets for the configmap
   enabled: false
   # -- Annotations to add to the external secret
-  annotations: {}
+  annotations: { }
   # -- Secret store reference
   secretStoreRef:
     name: ""
@@ -128,11 +128,11 @@ externalSecrets:
   # -- Refresh interval for the external secrets
   refreshInterval: 30m
   # -- Secrets to be loaded from the external secret store
-  data: []
+  data: [ ]
     # - secretKey: mqtt_broker
     #   remoteRef:
-    #     key: evcc/configmap
-    #     property: mqtt_broker
+  #     key: evcc/configmap
+  #     property: mqtt_broker
 
 # -- Service account
 serviceAccount:
@@ -141,20 +141,20 @@ serviceAccount:
   # -- Automatically mount a ServiceAccount's API credentials?
   automount: true
   # -- Annotations to add to the service account
-  annotations: {}
+  annotations: { }
   # -- The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
 
 # -- Annotations to add to the Pod
-podAnnotations: {}
+podAnnotations: { }
 
 # -- Labels to add to the Pod.
-podLabels: {}
+podLabels: { }
 
 # -- PodSecurityContext to be set on the pod level.
-podSecurityContext: {}
-  # fsGroup: 2000
+podSecurityContext: { }
+# fsGroup: 2000
 
 # -- SecurityContext to be set on the container level.
 securityContext:
@@ -176,7 +176,7 @@ service:
   # -- Kubernetes port where service is exposed
   port: 80
   # -- Annotations for the service
-  annotations: {}
+  annotations: { }
   # -- Enable/disable specific ports in the service
   ports:
     # -- Enable mDNS port (5353/udp)
@@ -211,7 +211,7 @@ ingress:
   # -- The ingress class to use
   className: ""
   # -- Annotations for the ingress
-  annotations: {}
+  annotations: { }
   # -- The ingress rules to use
   hosts:
     - host: evcc.local
@@ -219,7 +219,7 @@ ingress:
         - path: /
           pathType: ImplementationSpecific
   # -- TLS configuration for the ingress
-  tls: []
+  tls: [ ]
   #  - secretName: evcc-tls
   #    hosts:
   #      - evcc.local
@@ -231,9 +231,9 @@ httproute:
   hostnames:
     - evcc.local
   # -- The parent reference for the HTTPRoute
-  parentRef: {}
+  parentRef: { }
   # -- Annotations for the HTTPRoute
-  annotations: {}
+  annotations: { }
   # -- The rules to use for the HTTPRoute
   rules:
     - matches:
@@ -289,10 +289,18 @@ persistence:
         cpu: 50m
         memory: 128Mi
 
-    # -- Backup type (currently supports: s3)
+    # -- Replication type - s3 or local file.
+    # If not specified, defaults to local file.
     type: s3
+
+    # -- Local file backup configuration
+    path: "/backups/evcc.db"
+
     # -- S3 backup configuration
     s3:
+      # -- Backup URL (example for S3: s3://bucket/path/to/backup.db)
+      # If URL is provided, the other S3 options are ignored
+      url : "s3://evcc-backups/evcc.db"
       # -- S3 bucket name
       bucket: ""
       # -- S3 region
@@ -301,6 +309,10 @@ persistence:
       endpoint: ""
       # -- S3 path prefix (optional)
       path: ""
+      # -- Whether to sign payloads for S3 (default: false)
+      signPayload: true
+      # -- Whether to use force path style for S3 (default: false)
+      forcePathStyle: false
       # -- S3 access key ID (can also be set via secret)
       accessKeyId: ""
       # -- S3 secret access key (can also be set via secret)
@@ -331,15 +343,15 @@ readinessProbe:
 lifecycle:
   postStart:
     exec:
-      command: ["/bin/sh", "-c", "cp /etc/evcc/evcc.yaml /etc/evcc.yaml"]
+      command: [ "/bin/sh", "-c", "cp /etc/evcc/evcc.yaml /etc/evcc.yaml" ]
 
 # -- Additional volumes on the output Deployment definition.
-extraVolumes: []
+extraVolumes: [ ]
 # -- Additional volumeMounts on the output Deployment definition.
-extraVolumeMounts: []
+extraVolumeMounts: [ ]
 # -- NodeSelector to use for the deployment
-nodeSelector: {}
+nodeSelector: { }
 # -- Tolerations to use for the deployment
-tolerations: []
+tolerations: [ ]
 # -- Affinity to use for the deployment
-affinity: {}
+affinity: { }
