@@ -311,6 +311,21 @@ persistence:
       secretAccessKeyIdKey: access-key-id
       secretSecretAccessKeyKey: secret-access-key
 
+    # -- Prometheus metrics configuration for Litestream
+    metrics:
+      # -- Whether to enable the Litestream Prometheus metrics endpoint
+      enabled: false
+      # -- Address for the Litestream metrics HTTP server (exposes /metrics)
+      addr: ":9090"
+      # -- ServiceMonitor configuration for Prometheus Operator
+      serviceMonitor:
+        # -- Whether to create a ServiceMonitor resource
+        enabled: false
+        # -- Interval at which Prometheus scrapes metrics
+        interval: 30s
+        # -- Additional labels to add to the ServiceMonitor
+        labels: {}
+
 # -- Liveness probe for the deployment
 livenessProbe:
   httpGet:

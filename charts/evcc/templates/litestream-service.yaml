@@ -1,0 +1,21 @@
+{{- if and .Values.persistence.enabled .Values.persistence.backup.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "evcc.fullname" . }}-litestream
+  labels:
+    {{- include "evcc.labels" . | nindent 4 }}
+    component: litestream
+spec:
+  clusterIP: None
+  selector:
+    {{- include "evcc.selectorLabels" . | nindent 4 }}
+    component: litestream
+  {{- if .Values.persistence.backup.metrics.enabled }}
+  ports:
+    - name: metrics
+      port: {{ trimPrefix ":" .Values.persistence.backup.metrics.addr }}
+      targetPort: metrics
+      protocol: TCP
+  {{- end }}
+{{- end }}

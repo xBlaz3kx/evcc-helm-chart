@@ -118,10 +118,12 @@ spec:
         - name: AWS_ENDPOINT
           value: {{ .Values.persistence.backup.s3.endpoint | quote }}
         {{- end }}
+        {{- if .Values.persistence.backup.metrics.enabled }}
         ports:
         - name: metrics
-          containerPort: 9090
+          containerPort: {{ trimPrefix ":" .Values.persistence.backup.metrics.addr }}
           protocol: TCP
+        {{- end }}
         resources:
           {{- toYaml .Values.persistence.backup.resources | nindent 10 }}
       volumes:

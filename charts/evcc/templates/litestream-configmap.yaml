@@ -7,6 +7,9 @@ metadata:
     {{- include "evcc.labels" . | nindent 4 }}
 data:
   litestream.yml: |
+    {{- if .Values.persistence.backup.metrics.enabled }}
+    addr: {{ .Values.persistence.backup.metrics.addr | quote }}
+    {{- end }}
     dbs:
       - path: {{ .Values.persistence.databasePath }}
         monitor-interval: 1m
