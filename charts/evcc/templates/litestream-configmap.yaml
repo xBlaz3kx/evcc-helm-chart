@@ -18,6 +18,9 @@ metadata:
     {{- include "evcc.labels" . | nindent 4 }}
 data:
   litestream.yml: |
+    {{- if .Values.persistence.backup.metrics.enabled }}
+    addr: {{ .Values.persistence.backup.metrics.addr | quote }}
+    {{- end }}
     dbs:
       {{- if not (empty .Values.persistence.backup.replicaPath) }}
       - path: {{ .Values.persistence.databasePath }}
