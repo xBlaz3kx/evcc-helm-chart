@@ -338,6 +338,19 @@ persistence:
         # -- Additional labels to add to the ServiceMonitor
         labels: {}
 
+# -- Prometheus metrics configuration for evcc
+metrics:
+  # -- Whether to enable the evcc Prometheus metrics endpoint scraping
+  enabled: false
+  # -- ServiceMonitor configuration for Prometheus Operator
+  serviceMonitor:
+    # -- Whether to create a ServiceMonitor resource
+    enabled: false
+    # -- Interval at which Prometheus scrapes metrics
+    interval: 30s
+    # -- Additional labels to add to the ServiceMonitor
+    labels: {}
+
 # -- Liveness probe for the deployment
 livenessProbe:
   httpGet:
