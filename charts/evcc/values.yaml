@@ -298,16 +298,16 @@ persistence:
 
     # -- S3 backup configuration
     s3:
-      # -- Backup URL (example for S3: s3://bucket/path/to/backup.db)
-      # If URL is provided, the other S3 options are ignored
-      url : "s3://evcc-backups/evcc.db"
+      # -- Backup URL (e.g. s3://bucket/path/to/backup.db).
+      # If set, bucket, path, region, endpoint, forcePathStyle and signPayload are ignored.
+      url: ""
       # -- S3 bucket name
       bucket: ""
       # -- S3 region
       region: ""
       # -- S3 endpoint (optional, for S3-compatible services)
       endpoint: ""
-      # -- S3 path prefix (optional)
+      # -- Path inside the bucket to store replicas under (optional, leading "/" is stripped)
       path: ""
       # -- Whether to sign payloads for S3 (default: false)
       signPayload: true
