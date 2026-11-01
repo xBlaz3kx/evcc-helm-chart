@@ -32,20 +32,26 @@ data:
         checkpoint-interval: 1m
         replica:
           sync-interval: 1h
-          {{- if eq .Values.persistence.backup.type "s3"}}
+          {{- if eq .Values.persistence.backup.type "s3" }}
           {{- if .Values.persistence.backup.s3.url }}
-          url: {{ .Values.persistence.backup.s3.url }}
-          {{else}}
+          url: {{ .Values.persistence.backup.s3.url | quote }}
+          {{- else }}
           type: s3
-          region: {{ .Values.persistence.backup.s3.region }}
-          endpoint: {{ .Values.persistence.backup.s3.endpoint }}
-          bucket: {{ .Values.persistence.backup.s3.bucket }}
+          bucket: {{ .Values.persistence.backup.s3.bucket | quote }}
+          {{- with (trimPrefix "/" .Values.persistence.backup.s3.path) }}
+          path: {{ . | quote }}
+          {{- end }}
+          {{- with .Values.persistence.backup.s3.region }}
+          region: {{ . | quote }}
+          {{- end }}
+          {{- with .Values.persistence.backup.s3.endpoint }}
+          endpoint: {{ . | quote }}
+          {{- end }}
           force-path-style: {{ .Values.persistence.backup.s3.forcePathStyle | default false }}
           sign-payload: {{ .Values.persistence.backup.s3.signPayload | default false }}
-          {{ end}}
-          {{else}}
-          path: {{ .Values.persistence.backup.s3.path }}
           {{- end }}
-
+          {{- else }}
+          path: {{ .Values.persistence.backup.path | quote }}
+          {{- end }}
 {{- end }}
 
